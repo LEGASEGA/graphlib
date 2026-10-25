@@ -1,3 +1,20 @@
+/*
+ * graphlib - A simple graphics library built over SDL2.
+ * Copyright (C) 2026 LEGASEGA/LJEManim
+ *
+ * This library is free software; you can redistribute it
+ * and/or modify it under the terms of the GNU Lesser General
+ * Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * See https://www.gnu.org/licenses/lgpl-3.0.html
+ */
+
+
 #include <SDL2/SDL.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -103,7 +120,6 @@ void Resize_Window(G_Window* win, int w, int h){
 void Push_Window(G_Window* win){
     memcpy(win->pixels, win->backpixels, win->width * win->height * sizeof(uint32_t));
     if (win->isdirty){SDL_UpdateTexture(win->texture, NULL, win->pixels, win->width * 4);}
-    SDL_SetRenderTarget(win->renderer, win->sdl_win);
     SDL_RenderCopy(win->renderer, win->texture,NULL,NULL);
     SDL_RenderPresent(win->renderer);
     win->isdirty = 0;
@@ -155,6 +171,35 @@ void Draw_FillRect(G_Window* win, int x, int y, int w, int h, Color color) {
     }
 }
 
+void Draw_Line(G_Window* win, int startx, int starty, int endx, int endy, Color color){
+    int diffx = abs(startx - endx);
+    int diffy = abs(starty - endy);
+    int x = startx;
+    int y = starty;
+    int stepx;
+    int stepy;
+    int err = diffx - diffy;
+    if (startx < endx){
+        stepx = 1;
+    } else {
+        stepx = -1;
+    }
+
+    if (starty < endy){
+        stepy = 1;
+    } else {
+        stepy = -1;
+    }
+    while (x != endx || y != endy){
+        int e2 = 2 * err;
+        if (e2 >= -diffy){x += stepx; err -= diffy;}
+        if (e2 <= diffx){y += stepy; err += diffx;}
+        Draw_Pixel(win, x, y, color);
+    }
+}
+
+
+
 int Poll_Event(G_Event* event){
     SDL_Event sdl_event;
     if (!SDL_PollEvent(&sdl_event)){
@@ -182,6 +227,10 @@ int Poll_Event(G_Event* event){
             case SDL_KEYUP:
                 event->type = G_Key_Up;
                 event->key.scancode = sdl_event.key.keysym.scancode;
+                break;
+            case SDL_APP_TERMINATING:
+                event->type = G_App_Terminating;
+                printf("Welp");
                 break;
         }
         return 1;
