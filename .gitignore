@@ -1,1 +1,17 @@
+# --- VS Code ---
+.vscode/
+
+# --- macOS System Files ---
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# --- C Compilation Output ---
+# Your specific executable in the root directory
 /my_program
+
+# Object files and dynamic libraries
+*.o
+*.out
+*.so
+*.dylib
