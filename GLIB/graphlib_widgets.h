@@ -26,6 +26,8 @@ typedef enum{
 }G_WidgetType;
 
 typedef struct G_Widget G_Widget;
+
+
 struct G_Widget{
     int x;
     int y;
@@ -49,9 +51,11 @@ typedef struct{
     G_Widget* base;
 } G_Panel; //A container made for containing other widgets. thats it's only purpose
 typedef struct {
-    G_Widget *elements;
+    G_Widget **elements;
     size_t count;
 } G_Widget_Array;
 
+int Get_Widget_Absolute_X(G_Widget* widget);
+int Get_Widget_Absolute_Y(G_Widget* widget);
 void Draw_Widgets(G_Widget_Array* arr, G_Window* win);
 #endif

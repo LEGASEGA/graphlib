@@ -258,18 +258,6 @@ void Delay(uint32_t time){
     SDL_Delay(time);
 }
 
-
-
-void Draw_Widgets(G_Widget_Array* arr, G_Window* win){
-    for (int i = 0; i < arr->count; ++i){
-        G_Widget* widget = &arr->elements[i];
-
-        if (widget->id == Button){
-            Draw_FillRect(win, Get_Widget_Absolute_X(widget), Get_Widget_Absolute_Y(widget), widget->w, widget->h, widget->color);
-        }
-    }
-}
-
 int Get_Widget_Absolute_X(G_Widget* widget){
     if (widget != NULL){
         int abs_x = widget->x;
@@ -297,3 +285,26 @@ int Get_Widget_Absolute_Y(G_Widget* widget){ /* All widget's coordinates are rel
         return 0;
     }
 }
+
+void Draw_Widgets(G_Widget_Array* arr, G_Window* win){
+    if (arr == NULL || win == NULL){
+        return;
+    }
+
+    for (size_t i = 0; i < arr->count; ++i){
+        G_Widget* widget = arr->elements[i];
+        if (widget == NULL){
+            continue;
+        }
+
+        if (widget->id == Button){
+            Draw_FillRect(win,
+                          Get_Widget_Absolute_X(widget),
+                          Get_Widget_Absolute_Y(widget),
+                          widget->w,
+                          widget->h,
+                          widget->color);
+        }
+    }
+}
+
