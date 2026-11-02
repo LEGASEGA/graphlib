@@ -3,6 +3,7 @@
 
 #include "graphlib.h"
 #include <stdbool.h>
+#include <stdlib.h>
 /*
  * graphlib - A simple graphics library built over SDL2.
  * Copyright (C) 2026 LEGASEGA/LJEManim
@@ -27,14 +28,26 @@ typedef enum{
 typedef struct{
     int x;
     int y;
+    
+    int w;
+    int h;
+
     G_WidgetType id;
     bool active;
+    G_Widget* parent;
+
+    Color color;
 }G_Widget;
 
 typedef struct{
-    G_Widget base;
-    int w;
-    int h;
+    G_Widget* base;
     void (*on_click)(void* data);
 } G_Button;
+
+typedef struct {
+    G_Widget *elements;
+    size_t count;
+} G_Widget_Array;
+
+void Draw_Widgets(G_Widget_Array* arr, G_Window* win);
 #endif

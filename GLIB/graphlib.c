@@ -257,3 +257,19 @@ int Poll_Event(G_Event* event) {
 void Delay(uint32_t time){
     SDL_Delay(time);
 }
+
+
+
+void Draw_Widgets(G_Widget_Array* arr, G_Window* win){
+    for (int i = 0; i > arr->count; i++){
+        if (arr->elements[i].id = Button){
+            if (arr->elements->parent != NULL){
+                Draw_FillRect(win, arr->elements->parent->x + arr->elements[i].x, arr->elements->parent->y + arr->elements[i].y, arr->elements[i].w, arr->elements[i].h, arr->elements->color);
+                //A widgets X/Y coordinates are relative to it's parent.
+            } else {
+                Draw_FillRect(win, arr->elements[i].x, arr->elements[i].y, arr->elements[i].w, arr->elements[i].h, arr->elements[i].color);
+            }
+        }
+    }
+
+}

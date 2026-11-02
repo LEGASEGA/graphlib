@@ -25,10 +25,7 @@
 
 #include <stdint.h>
 
-//Import the libraries that actually define raylib.
-#include "graphlib_keys.h"
-#include "graphlibs_events.h"
-#include "graphlib_draw.h"
+
 //Window related stuff
 typedef struct G_Window G_Window;
 
@@ -39,4 +36,9 @@ void Clear_Screen(G_Window* win);
 void Resize_Window(G_Window* win, int w, int h);
 void Push_Window(G_Window* win);
 
+//Import the libraries that actually define graphlib AFTER the window api.
+#include "graphlib_keys.h"
+#include "graphlibs_events.h"
+#include "graphlib_draw.h"
+#include "graphlib_widgets.h"
 #endif
