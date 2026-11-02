@@ -1,4 +1,4 @@
-#include "graphlib.h"
+#include "GLIB/graphlib.h"
 #include "stdbool.h"
 #include <stdio.h>
 #include "SDL2/SDL.h"
@@ -8,7 +8,9 @@ int main(int argc, char* argv[]) {
     if (!win) {
         return 1;
     }
-
+    
+    Resize_Window(win, 600, 400);
+    Resize_Window(win, 800, 600);
     // Movable object starting position
     int x = 350;
     int y = 250;
@@ -28,19 +30,19 @@ int main(int argc, char* argv[]) {
                     break;
                 case G_Key_Down:
                     switch (event.key.scancode) {
-                        case SDL_SCANCODE_LEFT:
+                        case SCANCODE_LEFT:
                             x -= 20;
                             break;
-                        case SDL_SCANCODE_RIGHT:
+                        case SCANCODE_RIGHT:
                             x += 20;
                             break;
-                        case SDL_SCANCODE_UP:
+                        case SCANCODE_UP:
                             y -= 20;
                             break;
-                        case SDL_SCANCODE_DOWN:
+                        case SCANCODE_DOWN:
                             y += 20;
                             break;
-                        case SDL_SCANCODE_ESCAPE:
+                        case SCANCODE_ESCAPE:
                             running = false;
                             break;
                     }
@@ -58,10 +60,10 @@ int main(int argc, char* argv[]) {
         Draw_Line(win, 40, 560, 40, 40, line_color);   // Left
 
         // 2. Draw diagonal accent lines from corners
-        /*Draw_Line(win, 40, 40, 140, 140, accent_color);
+        Draw_Line(win, 40, 40, 140, 140, accent_color);
         Draw_Line(win, 760, 40, 660, 140, accent_color);
         Draw_Line(win, 40, 560, 140, 460, accent_color);
-        Draw_Line(win, 760, 560, 660, 460, accent_color);*/
+        Draw_Line(win, 760, 560, 660, 460, accent_color);
 
         // 3. Draw your movable rectangle object
         Draw_FillRect(win, x, y, 100, 100, rect_color);
@@ -70,7 +72,7 @@ int main(int argc, char* argv[]) {
         Push_Window(win);
 
         // Cap frame rate roughly to ~60 FPS to prevent 100% CPU usage
-        SDL_Delay(16);
+        Delay(16);
     }
 
     Kill_Window(win);

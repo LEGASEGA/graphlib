@@ -60,6 +60,7 @@ G_Window* Create_Window(int w, int h, const char* title, uint32_t wflags, uint32
     win->sdl_win = SDL_CreateWindow(title, 0, 0, w, h, wflags);
     if (win->sdl_win == NULL) {
         free(win->pixels);
+        free(win->backpixels);
         free(win);
         return NULL;
     }
@@ -69,18 +70,19 @@ G_Window* Create_Window(int w, int h, const char* title, uint32_t wflags, uint32
     if (win->renderer == NULL) {
         SDL_DestroyWindow(win->sdl_win);
         free(win->pixels);
+        free(win->backpixels);
         free(win);
         return NULL;
     }
     
     //5. Initialize texture
-
     win->texture = SDL_CreateTexture(win->renderer, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, win->width, win->height);
 
     if (win->texture == NULL){
         SDL_DestroyWindow(win->sdl_win);
         SDL_DestroyRenderer(win->renderer);
         free(win->pixels);
+        free(win->backpixels);
         free(win);
         return NULL;
     }
@@ -106,7 +108,8 @@ void Kill_Window(G_Window* win){
 }
 
 void Clear_Screen(G_Window* win) {
-    memset(win->backpixels, 0, win->width * win->height * 4);        
+    memset(win->backpixels, 0, win->width * win->height * 4);    
+    win->isdirty = 1;    
 }
 
 void Resize_Window(G_Window* win, int w, int h){
@@ -114,9 +117,25 @@ void Resize_Window(G_Window* win, int w, int h){
         SDL_SetWindowSize(win->sdl_win, w, h);
         win->width = w;
         win->height = h;
+
+        // Safely reallocate and capture return pointers
+        uint32_t* new_pixels = realloc(win->pixels, w * h * sizeof(uint32_t));
+        if (new_pixels != NULL) {
+            win->pixels = new_pixels;
+        }
+
+        uint32_t* new_backpixels = realloc(win->backpixels, w * h * sizeof(uint32_t));
+        if (new_backpixels != NULL) {
+            win->backpixels = new_backpixels;
+        }
+
+        // Recreate the texture to match the new dimensions
+        if (win->texture != NULL) {
+            SDL_DestroyTexture(win->texture);
+        }
+        win->texture = SDL_CreateTexture(win->renderer, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, w, h);
     }
 }
-
 void Push_Window(G_Window* win){
     memcpy(win->pixels, win->backpixels, win->width * win->height * sizeof(uint32_t));
     if (win->isdirty){SDL_UpdateTexture(win->texture, NULL, win->pixels, win->width * 4);}
@@ -176,66 +195,63 @@ void Draw_Line(G_Window* win, int startx, int starty, int endx, int endy, Color 
     int diffy = abs(starty - endy);
     int x = startx;
     int y = starty;
-    int stepx;
-    int stepy;
+    int stepx = (startx < endx) ? 1 : -1;
+    int stepy = (starty < endy) ? 1 : -1;
     int err = diffx - diffy;
-    if (startx < endx){
-        stepx = 1;
-    } else {
-        stepx = -1;
-    }
 
-    if (starty < endy){
-        stepy = 1;
-    } else {
-        stepy = -1;
-    }
-    while (x != endx || y != endy){
-        int e2 = 2 * err;
-        if (e2 >= -diffy){x += stepx; err -= diffy;}
-        if (e2 <= diffx){y += stepy; err += diffx;}
+    while (true) {
         Draw_Pixel(win, x, y, color);
+        if (x == endx && y == endy) break;
+        int e2 = 2 * err;
+        if (e2 > -diffy) {
+            err -= diffy;
+            x += stepx;
+        }
+        if (e2 < diffx) {
+            err += diffx;
+            y += stepy;
+        }
     }
 }
 
 
 
-int Poll_Event(G_Event* event){
+int Poll_Event(G_Event* event) {
     SDL_Event sdl_event;
-    if (!SDL_PollEvent(&sdl_event)){
-        return 0;
-    } else{
-        switch (sdl_event.type){
+    while (SDL_PollEvent(&sdl_event)) {
+        switch (sdl_event.type) {
             case SDL_QUIT:
                 event->type = G_Quit;
-                break;
+                return 1;
             case SDL_MOUSEMOTION:
                 event->type = G_Mouse_Motion;
                 event->mouse.x = sdl_event.motion.x;
-                event->mouse.y =sdl_event.motion.y;
-                break;
+                event->mouse.y = sdl_event.motion.y;
+                return 1;
             case SDL_MOUSEBUTTONDOWN:
                 event->type = G_Mouse_Button_Down;
                 event->mouse.x = sdl_event.button.x;
                 event->mouse.y = sdl_event.button.y;
                 event->mouse.button = sdl_event.button.button;
-                break;
+                return 1;
             case SDL_KEYDOWN:
                 event->type = G_Key_Down;
                 event->key.scancode = sdl_event.key.keysym.scancode;
-                break;
+                return 1;
             case SDL_KEYUP:
                 event->type = G_Key_Up;
                 event->key.scancode = sdl_event.key.keysym.scancode;
-                break;
+                return 1;
             case SDL_APP_TERMINATING:
                 event->type = G_App_Terminating;
-                printf("Welp");
+                printf("Welp\n");
+                return 1;
+            default:
+                // Skip all unhandled SDL events and check the next one
                 break;
         }
-        return 1;
     }
-    
+    return 0;
 }
 
 void Delay(uint32_t time){
