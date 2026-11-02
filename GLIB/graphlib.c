@@ -261,15 +261,39 @@ void Delay(uint32_t time){
 
 
 void Draw_Widgets(G_Widget_Array* arr, G_Window* win){
-    for (int i = 0; i > arr->count; i++){
-        if (arr->elements[i].id = Button){
-            if (arr->elements->parent != NULL){
-                Draw_FillRect(win, arr->elements->parent->x + arr->elements[i].x, arr->elements->parent->y + arr->elements[i].y, arr->elements[i].w, arr->elements[i].h, arr->elements->color);
-                //A widgets X/Y coordinates are relative to it's parent.
-            } else {
-                Draw_FillRect(win, arr->elements[i].x, arr->elements[i].y, arr->elements[i].w, arr->elements[i].h, arr->elements[i].color);
-            }
+    for (int i = 0; i < arr->count; ++i){
+        G_Widget* widget = &arr->elements[i];
+
+        if (widget->id == Button){
+            Draw_FillRect(win, Get_Widget_Absolute_X(widget), Get_Widget_Absolute_Y(widget), widget->w, widget->h, widget->color);
         }
     }
+}
 
+int Get_Widget_Absolute_X(G_Widget* widget){
+    if (widget != NULL){
+        int abs_x = widget->x;
+        G_Widget* parent = widget->parent;
+        while (parent != NULL){
+            abs_x += parent->x;
+            parent = parent->parent;
+        }
+        return abs_x;
+    } else{
+        return 0;
+    }
+}
+
+int Get_Widget_Absolute_Y(G_Widget* widget){ /* All widget's coordinates are relative to their parents, therefore, we use helpers to calculate their absolute position.*/
+    if (widget != NULL){
+        int abs_y = widget->y;
+        G_Widget* parent = widget->parent;
+        while (parent != NULL){
+            abs_y += parent->y;
+            parent = parent->parent;
+        }
+        return abs_y;
+    } else{
+        return 0;
+    }
 }

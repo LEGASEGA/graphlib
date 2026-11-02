@@ -21,11 +21,12 @@
 
 
 typedef enum{
-    Button
+    Button,
+    Panel
 }G_WidgetType;
 
-
-typedef struct{
+typedef struct G_Widget G_Widget;
+struct G_Widget{
     int x;
     int y;
     
@@ -37,13 +38,16 @@ typedef struct{
     G_Widget* parent;
 
     Color color;
-}G_Widget;
+};
 
 typedef struct{
     G_Widget* base;
     void (*on_click)(void* data);
 } G_Button;
 
+typedef struct{
+    G_Widget* base;
+} G_Panel; //A container made for containing other widgets. thats it's only purpose
 typedef struct {
     G_Widget *elements;
     size_t count;
