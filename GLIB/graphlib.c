@@ -19,7 +19,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include "graphlib.h"
-#include "stdio.h"
+#include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
 
@@ -139,7 +139,7 @@ void Resize_Window(G_Window* win, int w, int h){
 void Push_Window(G_Window* win){
     memcpy(win->pixels, win->backpixels, win->width * win->height * sizeof(uint32_t));
     if (win->isdirty){SDL_UpdateTexture(win->texture, NULL, win->pixels, win->width * 4);}
-    SDL_RenderCopy(win->renderer, win->texture,NULL,NULL);
+    SDL_RenderCopy(win->renderer, win->texture, NULL, NULL);
     SDL_RenderPresent(win->renderer);
     win->isdirty = 0;
 }
@@ -296,15 +296,14 @@ void Draw_Widgets(G_Widget_Array* arr, G_Window* win){
         if (widget == NULL){
             continue;
         }
-
-        if (widget->id == Button){
-            Draw_FillRect(win,
-                          Get_Widget_Absolute_X(widget),
-                          Get_Widget_Absolute_Y(widget),
-                          widget->w,
-                          widget->h,
-                          widget->color);
+        if (widget->active){
+            if (widget->id == Button){
+                Draw_FillRect(win,Get_Widget_Absolute_X(widget), Get_Widget_Absolute_Y(widget), widget->w, widget->h, widget->color);
+            } else if (widget->id == Image){
+                
+            }
         }
+        
     }
 }
 
